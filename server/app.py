@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os
 
-from func import get_ambiance, get_human_count, get_sound_level, recommend_music_genre
+from func import get_ambiance, get_human_count, get_sound_level, get_music_genre
 
 #app instance
 app = Flask(__name__)
@@ -13,6 +13,7 @@ def upload_video():
     video_file = request.files['video']
     # Ensure the directory exists
     os.makedirs('uploads', exist_ok=True)
+    os.makedirs('output', exist_ok=True)
     # Save the video to a temporary location
     video_path = os.path.join('uploads', 'temp_video.webm')
     video_file.save(video_path)
@@ -24,7 +25,7 @@ def upload_video():
     ambiance_result = get_ambiance(human_count, sound_level)
 
     # Determine recommended music genre based on results
-    recommended_genre = recommend_music_genre(ambiance_result, human_count, sound_level)
+    recommended_genre = get_music_genre(ambiance_result)
 
     # Return results as JSON
     return jsonify({

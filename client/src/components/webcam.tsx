@@ -15,6 +15,7 @@ const WebcamComponent: React.FC = () => {
   const [capturing, setCapturing] = useState(false);
   const [recordedChunks, setRecordedChunks] = useState<BlobPart[]>([]);
   const [apiResponse, setApiResponse] = useState<ApiResponse | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const handleStartCaptureClick = useCallback(() => {
     setCapturing(true);
@@ -45,6 +46,26 @@ const WebcamComponent: React.FC = () => {
     [setRecordedChunks]
   );
 
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files?.length) {
+      setSelectedFile(event.target.files[0]);
+    }
+  };
+
+  const handleUploadClick = async () => {
+    if (selectedFile) {
+      const formData = new FormData();
+      formData.append("video", selectedFile);
+
+      await fetch("http://localhost:8080/api/upload", {
+        method: "POST",
+        body: formData,
+      })
+        .then((response) => response.json())
+        .then((data) => setApiResponse(data));
+    }
+  };
+
   useEffect(() => {
     if (recordedChunks.length) {
       const blob = new Blob(recordedChunks, {
@@ -71,6 +92,8 @@ const WebcamComponent: React.FC = () => {
       <Webcam audio={true} ref={webcamRef} muted />
 
       <button onClick={handleStartCaptureClick}>Start Capture</button>
+      <input type="file" accept="video/*" onChange={handleFileChange} />
+      <button onClick={handleUploadClick}>Upload Video</button>
       {apiResponse && (
         <div>
           <p>Ambiance: {apiResponse.ambiance}</p>
