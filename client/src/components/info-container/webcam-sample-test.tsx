@@ -1,5 +1,5 @@
 import React from "react";
-import { useRecordWebcam } from "react-record-webcam";
+import { useRecordWebcam } from "@/lib/packages";
 import { Button } from "./button";
 import { Select } from "./select";
 
