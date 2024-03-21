@@ -2,9 +2,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "../ui/button";
-import Webcam from "react-webcam";
 import { Input } from "../ui/input";
-import { Recording, useRecordWebcam } from "react-record-webcam";
+import { useRecordWebcam } from "react-record-webcam";
 import ysFixWebmDuration from "fix-webm-duration";
 import { Select } from "./select";
 
@@ -20,7 +19,6 @@ const AmbianceInfo = () => {
   const fileInput = useRef(null);
   const [sessionActive, setSessionActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [recording, setRecording] = useState<Recording | void>();
 
   const {
     activeRecordings,
@@ -43,6 +41,7 @@ const AmbianceInfo = () => {
   } = useRecordWebcam();
 
   const startSession = () => {
+    setSessionActive(true);
     startRecord();
   };
 
@@ -63,10 +62,10 @@ const AmbianceInfo = () => {
   const startCamera = async () => {
     const recording = await createRecording(videoDeviceId, audioDeviceId);
     if (recording) await openCamera(recording.id);
-    setRecording(recording);
   };
 
   const startRecord = async () => {
+    const recording = await createRecording();
     if (!recording) {
       return;
     }
