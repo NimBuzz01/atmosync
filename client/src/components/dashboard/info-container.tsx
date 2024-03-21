@@ -8,7 +8,6 @@ const InfoContainer = () => {
     <div className="flex h-full flex-col p-4">
       <Header />
       <AmbianceInfo />
-      {/* <WebcamSession /> */}
     </div>
   );
 };
