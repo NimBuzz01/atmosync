@@ -127,7 +127,7 @@ const AmbianceInfo = () => {
   }, [selectedFile]);
 
   return (
-    <div className="my-4 flex flex-col grow p-2 ">
+    <div className="flex flex-col p-2 my-4 grow ">
       {activeRecordings?.map((recording) => (
         <>
           <small>Status: {recording.status}</small>
@@ -144,7 +144,7 @@ const AmbianceInfo = () => {
         </>
       ))}
 
-      <div className="space-y-2 my-4">
+      <div className="my-4 space-y-2">
         <div className="flex">
           <h4>Select video input</h4>
           <Select
@@ -181,11 +181,11 @@ const AmbianceInfo = () => {
           </div>
         </>
       ) : (
-        <div className="flex flex-col grow justify-center items-center gap-2 p-4">
+        <div className="flex flex-col items-center justify-center gap-2 p-4 grow">
           <p>You have no sessions active. Start a session to begin.</p>
         </div>
       )}
-      <div className="w-full flex mt-auto pt-2 gap-2 ">
+      <div className="flex w-full gap-2 pt-2 mt-auto ">
         <Button className="w-full" variant="outline" onClick={startRecord}>
           Refresh Ambiance
         </Button>

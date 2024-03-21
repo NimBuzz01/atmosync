@@ -3,7 +3,7 @@ import { WebcamTest } from "../info-container/webcam-sample-test";
 
 const PlayerContainer = () => {
   return (
-    <div className="bg-slate-700 p-4 h-full text-slate-100">
+    <div className="h-full p-4 bg-slate-700 text-slate-100">
       <WebcamTest />
     </div>
   );

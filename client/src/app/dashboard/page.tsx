@@ -11,7 +11,7 @@ const Dashboard = () => {
 
   if (status === "loading") {
     return (
-      <div className="flex h-screen items-center justify-center">
+      <div className="flex items-center justify-center h-screen">
         <Preloader />
       </div>
     );

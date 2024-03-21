@@ -58,9 +58,9 @@ export function WebcamTest() {
   };
 
   return (
-    <div className="container mx-auto p-4 text-white">
+    <div className="container p-4 mx-auto text-white">
       <h1 className="text-3xl font-bold">React Record Webcam demo</h1>
-      <div className="space-y-2 my-4">
+      <div className="my-4 space-y-2">
         <div className="flex">
           <h4>Select video input</h4>
           <Select
@@ -87,17 +87,17 @@ export function WebcamTest() {
       <div className="my-2">
         <p>{errorMessage ? `Error: ${errorMessage}` : ""}</p>
       </div>
-      <div className="grid grid-cols-custom gap-4 my-4">
+      <div className="grid gap-4 my-4 grid-cols-custom">
         {activeRecordings?.map((recording) => (
-          <div className="bg-white rounded-lg px-4 py-4" key={recording.id}>
-            <div className="text-black grid grid-cols-1">
+          <div className="px-4 py-4 bg-white rounded-lg" key={recording.id}>
+            <div className="grid grid-cols-1 text-black">
               <p>Live</p>
               <small>Status: {recording.status}</small>
               <small>Video: {recording.videoLabel}</small>
               <small>Audio: {recording.audioLabel}</small>
             </div>
             <video ref={recording.webcamRef} loop autoPlay playsInline muted />
-            <div className="space-x-1 space-y-1 my-2">
+            <div className="my-2 space-x-1 space-y-1">
               <Button
                 inverted
                 disabled={
@@ -147,7 +147,7 @@ export function WebcamTest() {
             >
               <p>Preview</p>
               <video ref={recording.previewRef} autoPlay loop playsInline />
-              <div className="space-x-2 my-2">
+              <div className="my-2 space-x-2">
                 <Button inverted onClick={() => download(recording.id)}>
                   Download
                 </Button>

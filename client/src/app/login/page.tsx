@@ -21,7 +21,7 @@ export default function Login() {
   const router = useRouter();
   if (status === "loading") {
     return (
-      <div className="flex h-screen items-center justify-center">
+      <div className="flex items-center justify-center h-screen">
         <Preloader />
       </div>
     );
@@ -34,8 +34,8 @@ export default function Login() {
 
   if (status === "unauthenticated") {
     return (
-      <div className="h-screen flex justify-center items-center">
-        <Card className="mx-auto max-w-sm">
+      <div className="flex items-center justify-center h-screen">
+        <Card className="max-w-sm mx-auto">
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl font-bold">Login</CardTitle>
             <CardDescription>
@@ -66,23 +66,23 @@ export default function Login() {
               >
                 Login
               </Button>
-              <div className="flex justify-center w-full items-center space-x-2">
+              <div className="flex items-center justify-center w-full space-x-2">
                 <Separator className="w-2/5" />
-                <Label className="text-gray-400 text-xs">OR</Label>
+                <Label className="text-xs text-gray-400">OR</Label>
                 <Separator className="w-2/5" />
               </div>
               <Button
-                className="w-full flex items-center gap-2"
+                className="flex items-center w-full gap-2"
                 variant="outline"
                 onClick={() => signIn("github")}
               >
                 <FaGithub className="text-lg text-gray-600" />
                 Sign in with Github
               </Button>
-              <Label className="text-gray-400 text-xs">New to Atmosync?</Label>
+              <Label className="text-xs text-gray-400">New to Atmosync?</Label>
               <Button
                 variant="link"
-                className="text-blue-500 text-xs p-0 h-auto ml-1 "
+                className="h-auto p-0 ml-1 text-xs text-blue-500 "
                 onClick={() => {
                   router.push("/signup");
                 }}
