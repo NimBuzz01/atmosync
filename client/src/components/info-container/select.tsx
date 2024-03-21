@@ -9,7 +9,7 @@ type SelectProps = {
 export function Select(props: SelectProps) {
   return (
     <select
-      className="px-2 ml-2 text-black rounded-lg input p2"
+      className="px-2 ml-2 text-sm text-black rounded-sm input p2"
       onChange={props.onChange}
     >
       {props.items.map((item) => {

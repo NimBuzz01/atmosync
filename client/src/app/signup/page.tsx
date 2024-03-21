@@ -9,10 +9,12 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import WelcomeTitle from "@/components/welcome-title";
 
 export default function SignUp() {
   return (
-    <div className="flex items-center justify-center h-screen">
+    <div className="flex flex-col items-center justify-center h-screen gap-10">
+      <WelcomeTitle />
       <Card className="max-w-sm mx-auto">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">Sign Up</CardTitle>

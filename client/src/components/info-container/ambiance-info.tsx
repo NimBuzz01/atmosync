@@ -59,13 +59,20 @@ const AmbianceInfo = () => {
     }
   };
 
-  const startCamera = async () => {
-    const recording = await createRecording(videoDeviceId, audioDeviceId);
-    if (recording) await openCamera(recording.id);
-  };
+  const [recording, setRecording] = useState<any>();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const recording = await createRecording(videoDeviceId, audioDeviceId);
+      setRecording(recording);
+      if (recording) await openCamera(recording.id);
+      console.log(activeRecordings);
+    };
+
+    fetchData();
+  }, []);
 
   const startRecord = async () => {
-    const recording = await createRecording();
     if (!recording) {
       return;
     }
@@ -91,8 +98,8 @@ const AmbianceInfo = () => {
   };
 
   const stopSession = () => {
-    clearAllRecordings();
-    clearError();
+    // clearAllRecordings();
+    // clearError();
     setSessionActive(false);
   };
 
@@ -127,45 +134,38 @@ const AmbianceInfo = () => {
   }, [selectedFile]);
 
   return (
-    <div className="flex flex-col p-2 my-4 grow ">
+    <div className="flex flex-col pt-2 grow">
       {activeRecordings?.map((recording) => (
-        <>
-          <small>Status: {recording.status}</small>
-          <small>Video: {recording.videoLabel}</small>
-          <small>Audio: {recording.audioLabel}</small>
-          <video
-            key={recording.id}
-            ref={recording.webcamRef}
-            loop
-            autoPlay
-            playsInline
-            muted
-          />
-        </>
+        <div
+          key={recording.id}
+          className="relative flex justify-center w-full bg-black "
+        >
+          <div className="absolute flex flex-col gap-2 text-white top-2 left-2">
+            <div className="flex">
+              <small>Video Input</small>
+              <Select
+                items={devicesByType?.video || []}
+                dataset="deviceid"
+                onChange={handleSelect}
+              />
+            </div>
+            <div className="flex">
+              <small>Audio Input</small>
+              <Select
+                items={devicesByType?.audio || []}
+                dataset="deviceid"
+                onChange={handleSelect}
+              />
+            </div>
+
+            <small>Status: {recording.status}</small>
+          </div>
+          <video ref={recording.webcamRef} autoPlay playsInline muted />
+        </div>
       ))}
 
-      <div className="my-4 space-y-2">
-        <div className="flex">
-          <h4>Select video input</h4>
-          <Select
-            items={devicesByType?.video || []}
-            dataset="deviceid"
-            onChange={handleSelect}
-          />
-        </div>
-        <div className="flex">
-          <h4>Select audio input</h4>
-          <Select
-            items={devicesByType?.audio || []}
-            dataset="deviceid"
-            onChange={handleSelect}
-          />
-        </div>
-      </div>
-      <Button onClick={startCamera}>Start Session</Button>
-
       {apiResponse ? (
-        <>
+        <div className=" grow">
           <div className="flex flex-col items-center justify-center p-4">
             <p>Current Ambiance</p>
             <h1 className="text-2xl">{apiResponse.ambiance}</h1>
@@ -179,13 +179,13 @@ const AmbianceInfo = () => {
             </div>
             <Button variant="outline">View History</Button>
           </div>
-        </>
+        </div>
       ) : (
         <div className="flex flex-col items-center justify-center gap-2 p-4 grow">
           <p>You have no sessions active. Start a session to begin.</p>
         </div>
       )}
-      <div className="flex w-full gap-2 pt-2 mt-auto ">
+      <div className="flex w-full gap-2 pt-2">
         <Button className="w-full" variant="outline" onClick={startRecord}>
           Refresh Ambiance
         </Button>
