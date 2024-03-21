@@ -1,9 +1,9 @@
 import React from "react";
-import { useRecordWebcam } from "@/lib/packages";
+import { useRecordWebcam } from "@/lib/packages/react-record-webcam";
 import { Button } from "./button";
 import { Select } from "./select";
 
-export function App() {
+export function WebcamTest() {
   const {
     activeRecordings,
     cancelRecording,

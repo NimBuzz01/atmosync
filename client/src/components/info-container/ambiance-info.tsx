@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import { useRecordWebcam } from "@/lib/packages";
+import { useRecordWebcam } from "@/lib/packages/react-record-webcam";
 import ysFixWebmDuration from "fix-webm-duration";
 import { Select } from "./select";
 
