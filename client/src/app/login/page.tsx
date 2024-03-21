@@ -13,6 +13,7 @@ import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { FaGithub } from "react-icons/fa";
 import { Separator } from "@/components/ui/separator";
+import Preloader from "@/components/preloader";
 
 export default function Login() {
   // extracting data from usesession as session
@@ -21,7 +22,7 @@ export default function Login() {
   if (status === "loading") {
     return (
       <div className="flex h-screen items-center justify-center">
-        Loading...
+        <Preloader />
       </div>
     );
   }

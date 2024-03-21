@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os
+import subprocess
 
 from func import get_ambiance, get_human_count, get_sound_level, get_music_genre
 
