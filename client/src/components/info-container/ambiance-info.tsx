@@ -6,12 +6,16 @@ import { Input } from "../ui/input";
 import { useRecordWebcam } from "@/lib/packages/react-record-webcam";
 import ysFixWebmDuration from "fix-webm-duration";
 import { Select } from "./select";
+import { createHistoryEntry } from "@/lib/utils/feedback";
+import { useSession } from "next-auth/react";
+import { DefaultSession } from "next-auth";
+import { UserHistory } from "../user-history";
+import { getRecommendedGenre } from "@/lib/utils/music";
 
 interface ApiResponse {
   ambiance: string;
   humancount: string;
   soundlevel: string;
-  recommended_genre: string;
 }
 
 const AmbianceInfo = () => {
@@ -19,7 +23,9 @@ const AmbianceInfo = () => {
   const fileInput = useRef(null);
   const [sessionActive, setSessionActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [recommendedGenre, setRecommendedGenre] = useState<string[]>([]);
 
+  const { data: session } = useSession();
   const {
     activeRecordings,
     cancelRecording,
@@ -66,7 +72,6 @@ const AmbianceInfo = () => {
       const recording = await createRecording(videoDeviceId, audioDeviceId);
       setRecording(recording);
       if (recording) await openCamera(recording.id);
-      console.log(activeRecordings);
     };
 
     fetchData();
@@ -92,10 +97,30 @@ const AmbianceInfo = () => {
           body: formData,
         })
           .then((response) => response.json())
-          .then((data) => setApiResponse(data));
+          .then((data) => {
+            setApiResponse(data);
+            setRecommendedGenre(getRecommendedGenre(data.ambiance));
+          });
       });
     }
   };
+
+  useEffect(() => {
+    const createEntry = async () => {
+      if (session?.user.id) {
+        await createHistoryEntry(
+          session?.user?.id,
+          apiResponse?.ambiance ?? "Not Available",
+          apiResponse?.humancount ?? "Not Available",
+          apiResponse?.soundlevel ?? "Not Available"
+        );
+      }
+    };
+
+    if (apiResponse) {
+      createEntry();
+    }
+  }, [apiResponse]);
 
   const stopSession = () => {
     // clearAllRecordings();
@@ -127,6 +152,7 @@ const AmbianceInfo = () => {
         });
         const data = await response.json();
         setApiResponse(data);
+        setRecommendedGenre(getRecommendedGenre(data.ambiance));
       }
     };
 
@@ -141,23 +167,6 @@ const AmbianceInfo = () => {
           className="relative flex justify-center w-full bg-black "
         >
           <div className="absolute flex flex-col gap-2 text-white top-2 left-2">
-            <div className="flex">
-              <small>Video Input</small>
-              <Select
-                items={devicesByType?.video || []}
-                dataset="deviceid"
-                onChange={handleSelect}
-              />
-            </div>
-            <div className="flex">
-              <small>Audio Input</small>
-              <Select
-                items={devicesByType?.audio || []}
-                dataset="deviceid"
-                onChange={handleSelect}
-              />
-            </div>
-
             <small>Status: {recording.status}</small>
           </div>
           <video ref={recording.webcamRef} autoPlay playsInline muted />
@@ -175,14 +184,20 @@ const AmbianceInfo = () => {
             <div>
               <p>Human Count: {apiResponse.humancount}</p>
               <p>Sound Level: {apiResponse.soundlevel}</p>
-              <p>Recommended Genre: {apiResponse.recommended_genre}</p>
+              <p>
+                Recommended Genre:{" "}
+                {recommendedGenre.map((genre, index) => (
+                  <span key={index}>{genre}, </span>
+                ))}
+              </p>
             </div>
-            <Button variant="outline">View History</Button>
+            <UserHistory />
           </div>
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center gap-2 p-4 grow">
           <p>You have no sessions active. Start a session to begin.</p>
+          <UserHistory />
         </div>
       )}
       <div className="flex w-full gap-2 pt-2">

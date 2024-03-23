@@ -73,6 +73,12 @@ const handler = NextAuth({
   ],
   adapter: PrismaAdapter(prisma),
   secret: process.env.SECRET,
+  callbacks: {
+    async session({ session, user }) {
+      session.user.id = user.id;
+      return session;
+    },
+  },
 });
 
 export { handler as GET, handler as POST };

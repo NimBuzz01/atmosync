@@ -3,7 +3,7 @@ import { useSession } from "next-auth/react";
 import SettingsMenu from "./settings-menu";
 
 const Header = () => {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
 
   return (
     <>

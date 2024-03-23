@@ -11,26 +11,30 @@ from moviepy.editor import VideoFileClip
 
 # ml_functions.py
 def get_ambiance(human_count, sound_level):
-    if human_count > 15 and sound_level == 'high':
-        return 'Large Gathering'
-    elif 10 < human_count <= 15 and sound_level == 'high':
-        return 'Medium Gathering'
-    elif human_count <= 10 and sound_level == 'high':
-        return 'Small but Loud Group'
-    elif human_count > 15 and sound_level == 'medium':
-        return 'Large but Moderate Gathering'
-    elif 10 < human_count <= 15 and sound_level == 'medium':
-        return 'Medium and Moderate Gathering'
+    if human_count < 5 and sound_level == 'low':
+        return 'Quiet and Calm'
     elif human_count <= 10 and sound_level == 'medium':
-        return 'Small and Moderate Group'
-    elif human_count > 15 and sound_level == 'low':
-        return 'Large but Quiet Gathering'
+        return 'Cozy and Intimate'
+    elif 5 < human_count <= 10 and sound_level == 'high':
+        return 'Lively and Energetic'
+    elif human_count > 15 and sound_level == 'high':
+        return 'Busy and Bustling'
+    elif human_count <= 5 and sound_level == 'medium':
+        return 'Quiet but Moderate'
+    elif human_count <= 5 and sound_level == 'high':
+        return 'Quiet but Lively'
     elif 10 < human_count <= 15 and sound_level == 'low':
-        return 'Medium but Quiet Gathering'
-    elif human_count <= 10 and sound_level == 'low':
-        return 'Small Group or Quiet Gathering'
+        return 'Moderately Quiet'
+    elif 10 < human_count <= 15 and sound_level == 'medium':
+        return 'Moderately Cozy'
+    elif 10 < human_count <= 15 and sound_level == 'high':
+        return 'Moderately Energetic'
+    elif human_count > 15 and sound_level == 'low':
+        return 'Busy but Calm'
+    elif human_count > 15 and sound_level == 'medium':
+        return 'Busy but Cozy'
     else:
-        return 'Quiet or Empty Room'
+        return 'Ambiance not classified'
 
 def get_human_count(video_path):
     # Your human count ML logic here
@@ -57,7 +61,7 @@ def get_human_count(video_path):
             frame = og_frame.copy()
 
             # results = video_model(frame, device=0, classes=0, conf=0.8)
-            results = video_model(frame, device='cpu', classes=0, conf=0.8)
+            results = video_model(frame, device='cpu', classes=0, conf=0.5)
 
             for result in results:
                 boxes = result.boxes  # Boxes object for bbox outputs
@@ -69,7 +73,7 @@ def get_human_count(video_path):
 
     print(count)
     try:
-        return statistics.mode(count)
+        return statistics.mean(count)
     except statistics.StatisticsError:
         return None
 
@@ -83,17 +87,6 @@ def get_sound_level(video_path):
     audio_model.load_state_dict(torch.load('audio_model.pth'))
     sound_level = process_audio('output/temp_audio.wav', audio_model)
     return sound_level
-
-def get_music_genre(ambiance):
-    if ambiance in ['Large Gathering', 'Medium Gathering', 'Small but Loud Group']:
-        return 'Classical, Jazz, Ambient'
-    elif ambiance in ['Large but Moderate Gathering', 'Medium and Moderate Gathering', 'Small and Moderate Group']:
-        return 'Rock, Hip-Hop, Pop'
-    elif ambiance in ['Large but Quiet Gathering', 'Medium but Quiet Gathering', 'Small Group or Quiet Gathering', 'Quiet or Empty Room']:
-        return 'Pop, Dance, EDM'
-    else:
-        return 'Unknown Ambiance'
-
 
 def process_audio(audio_path, model):
     # Read the audio file
