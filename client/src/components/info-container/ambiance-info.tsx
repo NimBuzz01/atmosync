@@ -3,12 +3,10 @@ import React, { useEffect, useRef, useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import { useRecordWebcam } from "@/lib/packages/react-record-webcam";
+import { useRecordWebcam } from "react-record-webcam";
 import ysFixWebmDuration from "fix-webm-duration";
-import { Select } from "./select";
 import { createHistoryEntry } from "@/lib/utils/feedback";
 import { useSession } from "next-auth/react";
-import { DefaultSession } from "next-auth";
 import { UserHistory } from "../user-history";
 import { getRecommendedGenre } from "@/lib/utils/music";
 
@@ -28,22 +26,22 @@ const AmbianceInfo = () => {
   const { data: session } = useSession();
   const {
     activeRecordings,
-    cancelRecording,
-    clearAllRecordings,
-    clearError,
-    clearPreview,
-    closeCamera,
     createRecording,
     devicesById,
-    devicesByType,
-    download,
-    errorMessage,
-    muteRecording,
     openCamera,
-    pauseRecording,
-    resumeRecording,
     startRecording,
     stopRecording,
+    // cancelRecording,
+    // clearAllRecordings,
+    // clearError,
+    // clearPreview,
+    // closeCamera,
+    // devicesByType,
+    // download,
+    // errorMessage,
+    // muteRecording,
+    // pauseRecording,
+    // resumeRecording,
   } = useRecordWebcam();
 
   const startSession = () => {

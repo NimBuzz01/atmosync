@@ -18,7 +18,7 @@ import WelcomeTitle from "@/components/welcome-title";
 
 export default function Login() {
   // extracting data from usesession as session
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
   if (status === "loading") {
     return (
