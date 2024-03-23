@@ -45,11 +45,11 @@ export function UserHistory() {
           View History
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] bg-slate-50">
         <DialogHeader>
           <DialogTitle>User History</DialogTitle>
         </DialogHeader>
-        <div className="h-[500px] overflow-y-scroll pr-4">
+        <div className="h-[500px]  overflow-y-scroll scrollbar-thin scrollbar-thumb-slate-900 scrollbar-track-slate-50 pr-2">
           {history ? (
             history.map((entry) => (
               <Card key={entry.id} className="mb-2 flex text-sm flex-col p-2">

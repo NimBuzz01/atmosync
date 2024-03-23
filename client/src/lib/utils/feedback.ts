@@ -1,7 +1,3 @@
-import { PrismaClient } from "@prisma/client";
-
-const getFeedbackForAmbiance = (ambiance: string) => {};
-
 export async function createHistoryEntry(
   userId: string,
   ambiance: string,
