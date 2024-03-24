@@ -8,15 +8,17 @@ import { FaVolumeLow } from "react-icons/fa6";
 import { IoPlay, IoPause } from "react-icons/io5";
 
 const NowPlaying = () => {
-  const { currentPlaying, songs, setCurrentPlaying } = useMusicPlayerContext();
+  const { currentPlaying, songs, setCurrentPlaying, spotifyApi } =
+    useMusicPlayerContext();
   const [isPlaying, setIsPlaying] = useState(false);
-  const [volume, setVolume] = useState(0.5);
+  const [volume, setVolume] = useState(50);
   const [progress, setProgress] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     if (currentPlaying) {
       setIsPlaying(true);
+      // spotifyApi?.play();
       audioRef.current?.play();
     }
   }, [currentPlaying]);
@@ -24,14 +26,16 @@ const NowPlaying = () => {
   useEffect(() => {
     if (isPlaying) {
       audioRef.current?.play();
+      // spotifyApi?.play();
     } else {
       audioRef.current?.pause();
+      // spotifyApi?.pause();
     }
   }, [isPlaying]);
 
   useEffect(() => {
     if (audioRef.current) {
-      audioRef.current.volume = volume;
+      audioRef.current.volume = volume / 100;
     }
   }, [volume]);
 
@@ -90,11 +94,15 @@ const NowPlaying = () => {
             />
             <div>
               <p className="font-bold text-xl">{currentPlaying.name}</p>
-              <p className="text-xs">{currentPlaying.artists[0].name}</p>
+              <p className="text-xs">
+                {currentPlaying.artists.map((artist, index) => (
+                  <span key={index}>{artist.name}, </span>
+                ))}
+              </p>
             </div>
           </div>
           <div className="my-4">
-            <Progress value={progress * 100} className="h-2 bg-white" />
+            <Progress value={progress * 100} className="h-2 " />
             <div className="w-full flex items-center my-4">
               <div className="w-1/3"></div>
               <div className="w-1/3 flex gap-1 items-center justify-center">
@@ -131,15 +139,14 @@ const NowPlaying = () => {
               </div>
               <div className="w-1/3 gap-2 justify-end pr-6 flex items-center">
                 <FaVolumeLow className="text-lg" />
-                <Progress
-                  value={volume * 100}
+                <input
+                  type="range"
+                  value={volume}
+                  min={0}
+                  max={100}
                   className="h-[6px] w-28 bg-white"
-                  onClick={(e) => {
-                    const rect = (
-                      e.target as HTMLElement
-                    ).getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    setVolume(x / rect.width);
+                  onChange={(e) => {
+                    setVolume(Number(e.target.value));
                   }}
                 />
               </div>

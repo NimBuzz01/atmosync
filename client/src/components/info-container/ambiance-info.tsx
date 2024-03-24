@@ -12,42 +12,28 @@ import { ApiResponse } from "@/lib/types";
 import { useMusicPlayerContext } from "@/contexts/music-player-context";
 
 const AmbianceInfo = () => {
-  const fileInput = useRef(null);
+  // Refs
+  const fileInput = useRef<HTMLInputElement | null>(null);
+
+  // States
   const [sessionActive, setSessionActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [recording, setRecording] = useState<any>();
 
+  // Contexts
   const {
-    setAmbiance,
-    setHumanCount,
-    setSoundLevel,
     ambiance,
     humanCount,
     soundLevel,
+    setAmbiance,
+    setHumanCount,
+    setSoundLevel,
     recommendedGenre,
   } = useAmbianceContext();
-  const { spotifyApi, setSongs } = useMusicPlayerContext();
+  const { spotifyApi, setSongs, currentPlaying, setCurrentPlaying } =
+    useMusicPlayerContext();
 
-  useEffect(() => {
-    if (recommendedGenre) {
-      if (spotifyApi) {
-        spotifyApi
-          .searchTracks(`genre:${recommendedGenre}`, { limit: 20 })
-          .then(
-            function (data) {
-              if (data.body.tracks) {
-                setSongs(data.body.tracks.items);
-              } else {
-                console.error("No tracks found");
-              }
-            },
-            function (err) {
-              console.error(err);
-            }
-          );
-      }
-    }
-  }, [recommendedGenre]);
-
+  // Webcam hooks
   const {
     activeRecordings,
     createRecording,
@@ -55,41 +41,11 @@ const AmbianceInfo = () => {
     openCamera,
     startRecording,
     stopRecording,
-    // cancelRecording,
-    // clearAllRecordings,
-    // clearError,
-    // clearPreview,
-    // closeCamera,
-    // devicesByType,
-    // download,
-    // errorMessage,
-    // muteRecording,
-    // pauseRecording,
-    // resumeRecording,
   } = useRecordWebcam();
 
-  const startSession = () => {
-    setSessionActive(true);
-    startRecord();
-  };
-
-  const [videoDeviceId, setVideoDeviceId] = React.useState<string>("");
-  const [audioDeviceId, setAudioDeviceId] = React.useState<string>("");
-
-  // const handleSelect = async (event: any) => {
-  //   const { deviceid: deviceId } =
-  //     event.target.options[event.target.selectedIndex].dataset;
-  //   if (devicesById?.[deviceId].type === "videoinput") {
-  //     setVideoDeviceId(deviceId);
-  //   }
-  //   if (devicesById?.[deviceId].type === "audioinput") {
-  //     setAudioDeviceId(deviceId);
-  //   }
-  // };
-
-  const [recording, setRecording] = useState<any>();
-
+  // Effects
   useEffect(() => {
+    // Fetch data on mount
     const fetchData = async () => {
       const recording = await createRecording();
       setRecording(recording);
@@ -98,6 +54,20 @@ const AmbianceInfo = () => {
 
     fetchData();
   }, []);
+
+  useEffect(() => {
+    // Fetch data when selectedFile changes
+    const fetchData = async () => {
+      if (selectedFile) {
+        const data: ApiResponse = await getAmbianceData("file", selectedFile);
+        setAmbiance(data.ambiance);
+        setHumanCount(data.humancount);
+        setSoundLevel(data.soundlevel);
+      }
+    };
+
+    fetchData();
+  }, [selectedFile]);
 
   const startRecord = async () => {
     if (!recording) {
@@ -119,10 +89,45 @@ const AmbianceInfo = () => {
     }
   };
 
-  const stopSession = () => {
-    setSessionActive(false);
-  };
+  useEffect(() => {
+    // Start recording 30 seconds before the current song ends
+    let timeoutId: NodeJS.Timeout;
+    if (sessionActive && currentPlaying) {
+      const songDurationInSeconds = currentPlaying.duration_ms / 1000;
+      const delayBeforeRecording = (songDurationInSeconds - 30) * 1000; // Convert to milliseconds
+      timeoutId = setTimeout(() => {
+        startRecord();
+      }, delayBeforeRecording);
+    }
+    return () => {
+      clearTimeout(timeoutId); // Clear the timeout if the dependencies change
+    };
+  }, [sessionActive, currentPlaying, startRecord]);
 
+  useEffect(() => {
+    // Search tracks when recommendedGenre changes
+    if (recommendedGenre) {
+      if (spotifyApi) {
+        spotifyApi
+          .searchTracks(`genre:${recommendedGenre}`, { limit: 20 })
+          .then(
+            function (data) {
+              if (data.body.tracks) {
+                setSongs(data.body.tracks.items);
+                setCurrentPlaying(data.body.tracks.items[0]);
+              } else {
+                console.error("No tracks found");
+              }
+            },
+            function (err) {
+              console.error(err);
+            }
+          );
+      }
+    }
+  }, [recommendedGenre]);
+
+  // Handlers
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files?.length) {
       setSelectedFile(event.target.files[0]);
@@ -134,19 +139,6 @@ const AmbianceInfo = () => {
       (fileInput.current as HTMLInputElement).click();
     }
   };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      if (selectedFile) {
-        const data: ApiResponse = await getAmbianceData("file", selectedFile);
-        setAmbiance(data.ambiance);
-        setHumanCount(data.humancount);
-        setSoundLevel(data.soundlevel);
-      }
-    };
-
-    fetchData();
-  }, [selectedFile]);
 
   return (
     <div className="flex flex-col pt-2 grow">
@@ -193,19 +185,16 @@ const AmbianceInfo = () => {
         <Button className="w-full" variant="outline" onClick={startRecord}>
           Refresh Ambiance
         </Button>
-        {sessionActive ? (
-          <Button
-            variant="destructive"
-            className="w-full"
-            onClick={stopSession}
-          >
-            Stop Session
-          </Button>
-        ) : (
-          <Button className="w-full" onClick={startSession}>
-            Start Session
-          </Button>
-        )}
+
+        <Button
+          variant={`${sessionActive ? "destructive" : "default"}`}
+          className="w-full"
+          onClick={() => {
+            setSessionActive(!sessionActive);
+          }}
+        >
+          {sessionActive ? <>Stop Session</> : <>Start Session</>}
+        </Button>
         <Button
           className="w-full"
           variant="outline"
