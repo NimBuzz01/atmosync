@@ -1,12 +1,19 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "../ui/button";
 import { BsSkipStartFill } from "react-icons/bs";
 import { IoPause, IoPlay } from "react-icons/io5";
 import { FaVolumeLow } from "react-icons/fa6";
+import { useAmbianceContext } from "@/contexts/ambiance-context";
+import { useMusicPlayerContext } from "@/contexts/music-player-context";
 
-const PlayerControls = () => {
+interface Props {
+  song: SpotifyApi.TrackObjectFull;
+}
+
+const PlayerControls = ({ song }: Props) => {
   const [isPlaying, setIsPlaying] = React.useState(false);
+
   return (
     <div className="my-4">
       <Progress value={33} className="h-2" />

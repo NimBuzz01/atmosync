@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 import SessionWrapper from "@/components/session-wrapper";
 import localFont from "next/font/local";
+import { AmbianceProvider } from "@/contexts/ambiance-context";
+import { MusicPlayerProvider } from "@/contexts/music-player-context";
 
 const sfpro = localFont({
   src: [
@@ -55,7 +57,9 @@ export default function RootLayout({
         <body
           className={`${sfpro.className} bg-slate-50 h-screen text-slate-900 relative dark:bg-slate-900 dark:text-slate-100`}
         >
-          {children}
+          <AmbianceProvider>
+            <MusicPlayerProvider>{children}</MusicPlayerProvider>
+          </AmbianceProvider>
         </body>
       </html>
     </SessionWrapper>

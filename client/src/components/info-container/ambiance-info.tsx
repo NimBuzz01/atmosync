@@ -5,25 +5,49 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { useRecordWebcam } from "react-record-webcam";
 import ysFixWebmDuration from "fix-webm-duration";
-import { createHistoryEntry } from "@/lib/utils/feedback";
-import { useSession } from "next-auth/react";
 import { UserHistory } from "../user-history";
-import { getRecommendedGenre } from "@/lib/utils/music";
-
-interface ApiResponse {
-  ambiance: string;
-  humancount: string;
-  soundlevel: string;
-}
+import { getAmbianceData } from "@/lib/utils/flask";
+import { useAmbianceContext } from "@/contexts/ambiance-context";
+import { ApiResponse } from "@/lib/types";
+import { useMusicPlayerContext } from "@/contexts/music-player-context";
 
 const AmbianceInfo = () => {
-  const [apiResponse, setApiResponse] = useState<ApiResponse | null>(null);
   const fileInput = useRef(null);
   const [sessionActive, setSessionActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [recommendedGenre, setRecommendedGenre] = useState<string[]>([]);
 
-  const { data: session } = useSession();
+  const {
+    setAmbiance,
+    setHumanCount,
+    setSoundLevel,
+    ambiance,
+    humanCount,
+    soundLevel,
+    recommendedGenre,
+  } = useAmbianceContext();
+  const { spotifyApi, setSongs } = useMusicPlayerContext();
+
+  useEffect(() => {
+    if (recommendedGenre) {
+      if (spotifyApi) {
+        spotifyApi
+          .searchTracks(`genre:${recommendedGenre}`, { limit: 20 })
+          .then(
+            function (data) {
+              if (data.body.tracks) {
+                setSongs(data.body.tracks.items);
+              } else {
+                console.error("No tracks found");
+              }
+            },
+            function (err) {
+              console.error(err);
+            }
+          );
+      }
+    }
+  }, [recommendedGenre]);
+
   const {
     activeRecordings,
     createRecording,
@@ -52,22 +76,22 @@ const AmbianceInfo = () => {
   const [videoDeviceId, setVideoDeviceId] = React.useState<string>("");
   const [audioDeviceId, setAudioDeviceId] = React.useState<string>("");
 
-  const handleSelect = async (event: any) => {
-    const { deviceid: deviceId } =
-      event.target.options[event.target.selectedIndex].dataset;
-    if (devicesById?.[deviceId].type === "videoinput") {
-      setVideoDeviceId(deviceId);
-    }
-    if (devicesById?.[deviceId].type === "audioinput") {
-      setAudioDeviceId(deviceId);
-    }
-  };
+  // const handleSelect = async (event: any) => {
+  //   const { deviceid: deviceId } =
+  //     event.target.options[event.target.selectedIndex].dataset;
+  //   if (devicesById?.[deviceId].type === "videoinput") {
+  //     setVideoDeviceId(deviceId);
+  //   }
+  //   if (devicesById?.[deviceId].type === "audioinput") {
+  //     setAudioDeviceId(deviceId);
+  //   }
+  // };
 
   const [recording, setRecording] = useState<any>();
 
   useEffect(() => {
     const fetchData = async () => {
-      const recording = await createRecording(videoDeviceId, audioDeviceId);
+      const recording = await createRecording();
       setRecording(recording);
       if (recording) await openCamera(recording.id);
     };
@@ -86,43 +110,16 @@ const AmbianceInfo = () => {
 
     if (recorded) {
       const temp_blob = recorded.blobChunks[0] as Blob;
-      ysFixWebmDuration(temp_blob, 5000, function (blob) {
-        const formData = new FormData();
-        formData.append("video", blob, "temp_video.webm");
-
-        fetch("http://localhost:8080/api/upload", {
-          method: "POST",
-          body: formData,
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            setApiResponse(data);
-            setRecommendedGenre(getRecommendedGenre(data.ambiance));
-          });
+      ysFixWebmDuration(temp_blob, 5000, async function (blob) {
+        const data: ApiResponse = await getAmbianceData("blob", blob);
+        setAmbiance(data.ambiance);
+        setHumanCount(data.humancount);
+        setSoundLevel(data.soundlevel);
       });
     }
   };
 
-  useEffect(() => {
-    const createEntry = async () => {
-      if (session?.user.id) {
-        await createHistoryEntry(
-          session?.user?.id,
-          apiResponse?.ambiance ?? "Not Available",
-          apiResponse?.humancount ?? "Not Available",
-          apiResponse?.soundlevel ?? "Not Available"
-        );
-      }
-    };
-
-    if (apiResponse) {
-      createEntry();
-    }
-  }, [apiResponse]);
-
   const stopSession = () => {
-    // clearAllRecordings();
-    // clearError();
     setSessionActive(false);
   };
 
@@ -141,16 +138,10 @@ const AmbianceInfo = () => {
   useEffect(() => {
     const fetchData = async () => {
       if (selectedFile) {
-        const formData = new FormData();
-        formData.append("video", selectedFile);
-
-        const response = await fetch("http://localhost:8080/api/upload", {
-          method: "POST",
-          body: formData,
-        });
-        const data = await response.json();
-        setApiResponse(data);
-        setRecommendedGenre(getRecommendedGenre(data.ambiance));
+        const data: ApiResponse = await getAmbianceData("file", selectedFile);
+        setAmbiance(data.ambiance);
+        setHumanCount(data.humancount);
+        setSoundLevel(data.soundlevel);
       }
     };
 
@@ -171,17 +162,17 @@ const AmbianceInfo = () => {
         </div>
       ))}
 
-      {apiResponse ? (
+      {ambiance ? (
         <div className=" grow">
           <div className="flex flex-col items-center justify-center p-4">
             <p>Current Ambiance</p>
-            <h1 className="text-2xl">{apiResponse.ambiance}</h1>
+            <h1 className="text-2xl">{ambiance}</h1>
           </div>
           <Separator />
           <div className="flex items-center justify-between p-2">
             <div>
-              <p>Human Count: {apiResponse.humancount}</p>
-              <p>Sound Level: {apiResponse.soundlevel}</p>
+              <p>Human Count: {humanCount}</p>
+              <p>Sound Level: {soundLevel}</p>
               <p>
                 Recommended Genre:{" "}
                 {recommendedGenre.map((genre, index) => (

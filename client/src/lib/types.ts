@@ -5,3 +5,9 @@ export interface TrackType {
   duration: string;
   image: string;
 }
+
+export interface ApiResponse {
+  ambiance: string;
+  humancount: string;
+  soundlevel: string;
+}
