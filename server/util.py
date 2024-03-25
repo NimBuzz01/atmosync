@@ -12,8 +12,8 @@ class AudioClassifier(nn.Module):
             self.device = torch.device('cpu')
         # Initialize a pre-trained ResNet34 model
         self.model = resnet34(weights='DEFAULT')
-        # Replace the last fully connected layer to match the number of classes (3 in this case)
-        self.model.fc = nn.Linear(512, 3)
+        # Replace the last fully connected layer to match the number of classes (10 in this case)
+        self.model.fc = nn.Linear(512, 10)
         # Replace the first convolutional layer to accept single-channel (grayscale) images
         self.model.conv1 = nn.Conv2d(1, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
         # Move the model to the specified device (CPU or GPU)

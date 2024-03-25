@@ -10,31 +10,17 @@ import statistics
 from moviepy.editor import VideoFileClip
 
 # ml_functions.py
-def get_ambiance(human_count, sound_level):
-    if human_count < 5 and sound_level == 'low':
+def get_ambiance(num_people, audio_class):
+    if audio_class in ['babble', 'tableforone'] and num_people <= 2:
         return 'Quiet and Calm'
-    elif human_count <= 10 and sound_level == 'medium':
-        return 'Cozy and Intimate'
-    elif 5 < human_count <= 10 and sound_level == 'high':
+    elif audio_class in ['cafeteria', 'chatter', 'cocktailparty', 'downstairs', 'soundproofed', 'waiting'] and num_people > 5:
         return 'Lively and Energetic'
-    elif human_count > 15 and sound_level == 'high':
+    elif audio_class in ['patronsonly', 'tableinfront'] and num_people <= 5:
+        return 'Cozy and Intimate'
+    elif audio_class in ['cafeteria', 'chatter', 'cocktailparty', 'downstairs', 'soundproofed', 'waiting'] and num_people > 10:
         return 'Busy and Bustling'
-    elif human_count <= 5 and sound_level == 'medium':
-        return 'Quiet but Moderate'
-    elif human_count <= 5 and sound_level == 'high':
-        return 'Quiet but Lively'
-    elif 10 < human_count <= 15 and sound_level == 'low':
-        return 'Moderately Quiet'
-    elif 10 < human_count <= 15 and sound_level == 'medium':
-        return 'Moderately Cozy'
-    elif 10 < human_count <= 15 and sound_level == 'high':
-        return 'Moderately Energetic'
-    elif human_count > 15 and sound_level == 'low':
-        return 'Busy but Calm'
-    elif human_count > 15 and sound_level == 'medium':
-        return 'Busy but Cozy'
     else:
-        return 'Ambiance not classified'
+        return 'Unclassified'
 
 def get_human_count(video_path):
     # Your human count ML logic here
