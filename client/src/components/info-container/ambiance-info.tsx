@@ -21,15 +21,7 @@ const AmbianceInfo = () => {
   const [recording, setRecording] = useState<any>();
 
   // Contexts
-  const {
-    ambiance,
-    humanCount,
-    soundLevel,
-    setAmbiance,
-    setHumanCount,
-    setSoundLevel,
-    recommendedGenre,
-  } = useAmbianceContext();
+  const { ambiance, setAmbiance, recommendedGenre } = useAmbianceContext();
   const { spotifyApi, setSongs, currentPlaying, setCurrentPlaying } =
     useMusicPlayerContext();
 
@@ -61,8 +53,6 @@ const AmbianceInfo = () => {
       if (selectedFile) {
         const data: ApiResponse = await getAmbianceData("file", selectedFile);
         setAmbiance(data.ambiance);
-        setHumanCount(data.humancount);
-        setSoundLevel(data.soundlevel);
       }
     };
 
@@ -83,8 +73,6 @@ const AmbianceInfo = () => {
       ysFixWebmDuration(temp_blob, 5000, async function (blob) {
         const data: ApiResponse = await getAmbianceData("blob", blob);
         setAmbiance(data.ambiance);
-        setHumanCount(data.humancount);
-        setSoundLevel(data.soundlevel);
       });
     }
   };
@@ -163,8 +151,6 @@ const AmbianceInfo = () => {
           <Separator />
           <div className="flex items-center justify-between p-2">
             <div>
-              <p>Human Count: {humanCount}</p>
-              <p>Sound Level: {soundLevel}</p>
               <p>
                 Recommended Genre:{" "}
                 {recommendedGenre.map((genre, index) => (

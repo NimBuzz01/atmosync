@@ -1,9 +1,4 @@
-export async function createHistoryEntry(
-  userId: string,
-  ambiance: string,
-  humanCount: string,
-  soundLevel: string
-) {
+export async function createHistoryEntry(userId: string, ambiance: string) {
   const response = await fetch("/api/prisma/create-history", {
     method: "POST",
     headers: {
@@ -12,8 +7,6 @@ export async function createHistoryEntry(
     body: JSON.stringify({
       userId: userId,
       ambiance: ambiance,
-      humanCount: humanCount,
-      soundLevel: soundLevel,
     }),
   })
     .then((res) => res.json())

@@ -22,8 +22,6 @@ export function UserHistory() {
       userId: string;
       createdAt: Date;
       ambiance: string;
-      humanCount: string;
-      soundLevel: string;
     }[]
   >([]);
 
@@ -53,8 +51,7 @@ export function UserHistory() {
                 <p>
                   Ambiance: <span>{entry.ambiance}</span>
                 </p>
-                <p>Human Count: {entry.humanCount}</p>
-                <p>Sound Level: {entry.soundLevel}</p>
+
                 <p>
                   Created At:{" "}
                   {entry.createdAt.toString().slice(0, 19).replace("T", " ")}

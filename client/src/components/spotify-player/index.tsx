@@ -3,7 +3,6 @@ import Logo from "./logo";
 import SearchBar from "./search-bar";
 import Queue from "./queue";
 import NowPlaying from "./now-playing";
-import { TrackType } from "@/lib/types";
 
 const SpotifyPlayer = () => {
   return (

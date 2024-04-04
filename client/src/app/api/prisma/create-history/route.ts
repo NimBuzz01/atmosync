@@ -2,14 +2,12 @@ import { PrismaClient } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
-  const { userId, ambiance, humanCount, soundLevel } = await request.json();
+  const { userId, ambiance } = await request.json();
   const prisma = new PrismaClient();
   const history = await prisma.history.create({
     data: {
       userId: userId,
       ambiance: ambiance,
-      humanCount: humanCount,
-      soundLevel: soundLevel,
     },
   });
   prisma.$disconnect();

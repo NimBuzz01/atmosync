@@ -14,10 +14,6 @@ import {
 interface AmbianceContextType {
   ambiance: string;
   setAmbiance: (value: string) => void;
-  soundLevel: string;
-  setSoundLevel: (value: string) => void;
-  humanCount: string;
-  setHumanCount: (value: string) => void;
   recommendedGenre: string[];
   setRecommendedGenre: (value: string[]) => void;
 }
@@ -32,8 +28,6 @@ export const AmbianceProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [ambiance, setAmbiance] = useState<string>("");
-  const [soundLevel, setSoundLevel] = useState<string>("");
-  const [humanCount, setHumanCount] = useState<string>("");
   const [recommendedGenre, setRecommendedGenre] = useState<string[]>([]);
 
   const { data: session } = useSession();
@@ -41,12 +35,7 @@ export const AmbianceProvider: React.FC<{ children: ReactNode }> = ({
   useEffect(() => {
     const createEntry = async () => {
       if (session?.user.id) {
-        await createHistoryEntry(
-          session?.user?.id,
-          ambiance,
-          humanCount,
-          soundLevel
-        );
+        await createHistoryEntry(session?.user?.id, ambiance);
       }
     };
     if (ambiance) {
@@ -60,10 +49,6 @@ export const AmbianceProvider: React.FC<{ children: ReactNode }> = ({
       value={{
         ambiance,
         setAmbiance,
-        soundLevel,
-        setSoundLevel,
-        humanCount,
-        setHumanCount,
         recommendedGenre,
         setRecommendedGenre,
       }}

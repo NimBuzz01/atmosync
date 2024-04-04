@@ -9,5 +9,6 @@ export interface TrackType {
 export interface ApiResponse {
   ambiance: string;
   humancount: string;
+  lighting: string;
   soundlevel: string;
 }

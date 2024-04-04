@@ -32,7 +32,7 @@ import Image from "next/image";
 import { useSession, signOut } from "next-auth/react";
 
 const SettingsMenu = () => {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
 
   return (
     <DropdownMenu>
