@@ -1,25 +1,66 @@
-import torch
-from torch import nn
-from torchvision.models import resnet34
+# Third-party library imports
+import numpy as np
+import matplotlib.pyplot as plt
+import cv2
+import librosa
+import librosa.display
+from PIL import Image
 
-class AudioClassifier(nn.Module):
-    def __init__(self):
-        super(AudioClassifier, self).__init__()  # Call the parent class's initializer
-        # Check if CUDA is available and set the device accordingly
-        if torch.cuda.is_available():
-            self.device = torch.device('cuda:0')
-        else:
-            self.device = torch.device('cpu')
-        # Initialize a pre-trained ResNet34 model
-        self.model = resnet34(weights='DEFAULT')
-        # Replace the last fully connected layer to match the number of classes (10 in this case)
-        self.model.fc = nn.Linear(512, 10)
-        # Replace the first convolutional layer to accept single-channel (grayscale) images
-        self.model.conv1 = nn.Conv2d(1, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
-        # Move the model to the specified device (CPU or GPU)
-        self.model = self.model.to(self.device)
+def extract_frames(video_path, frame_path):
+    video = cv2.VideoCapture(video_path)
+    frames = []
+    last_frame = None
+    fps = int(video.get(cv2.CAP_PROP_FPS))  # Get the frames per second of the video
 
-    def forward(self, x):
-        # Forward pass through the model
-        x = self.model(x)
-        return x
+    while video.isOpened() and len(frames) < 10:  # Only process the first 10 frames
+        ret, frame = video.read()
+        if not ret:
+            break
+        if int(video.get(cv2.CAP_PROP_POS_FRAMES)) % fps == 0:  # Only process a frame if it's a second mark
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)  # Convert BGR to RGB
+            frame = frame[:, :, :3]  # Ensure there are only 3 channels
+            frame = cv2.resize(frame, (224, 224))  # Resize the frame to desired dimensions
+            frames.append(frame)
+            last_frame = frame
+
+    video.release()
+
+    # Fill up with previous frames if less than 10 frames are created
+    while len(frames) < 10 and last_frame is not None:
+        frames.append(last_frame)
+
+    # Save each frame as a .png file
+    for i, frame in enumerate(frames):
+        image = Image.fromarray(frame)
+        image.save(f"{frame_path}_{i}.png")
+
+def extract_spectrogram_and_mfcc(audio_file, spectrogram_file, mfcc_file, num_mfcc=13):
+    y, sr = librosa.load(audio_file)
+
+    # Create the spectrogram
+    fig, ax = plt.subplots()
+    ms = librosa.feature.melspectrogram(y=y, sr=sr)
+    log_ms = librosa.power_to_db(ms, ref=np.max)
+    librosa.display.specshow(log_ms, sr=sr, ax=ax)
+    fig.savefig(spectrogram_file)
+    plt.close(fig)
+
+    # Extract MFCCs
+    mfccs = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=num_mfcc)
+
+    # Save the MFCCs as a PNG file
+    fig, ax = plt.subplots()
+    img = librosa.display.specshow(mfccs, x_axis='time', ax=ax)
+    fig.colorbar(img, ax=ax)
+    fig.savefig(mfcc_file)
+    plt.close(fig)
+
+def return_ambiance(ambiance):
+    if ambiance == "Quiet and Calm":
+        return "Busy and Bustling"
+    elif ambiance == "Lively and Energetic":
+        return "Cozy and Intimate"
+    elif ambiance == "Cozy and Intimate":
+        return "Lively and Energetic"
+    elif ambiance == "Busy and Bustling":
+        return "Quiet and Calm"

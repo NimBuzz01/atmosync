@@ -1,7 +1,12 @@
-# Define the classes for audio levels
-audio_classes = ['babble', 'cafeteria', 'chatter','cocktailparty', 'downstairs', 'patronsonly','soundproofed', 'tableforone', 'tableinfront', 'waiting']
-
-# 'babble' - yappin but not loud, 'cafeteria' - loud, 'chatter' - loud,'cocktailparty' - loud and crowd, 'downstairs' - loud, 'patronsonly' - cutleries only low human sound,'soundproofed' - loud, 'tableforone' - only one guy the mic is close to his table low sound, 'tableinfront' - not much people but talkin, 'waiting - loud and crowd'
-
-# Define the classes for objects
-video_classes = ['person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train', 'truck', 'boat', 'traffic light', 'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee', 'skis', 'snowboard', 'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard', 'tennis racket', 'bottle', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple', 'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair', 'couch', 'potted plant', 'bed', 'dining table', 'toilet', 'tv', 'laptop', 'mouse', 'remote', 'keyboard', 'cell phone', 'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors', 'teddy bear', 'hair drier', 'toothbrush']
+# Define constants
+DATASET_PATH = 'dataset'
+FRAME_PATH = 'output/frames'
+SPECTROGRAM_PATH = 'output/spectrograms'
+MFCC_PATH = 'output/mfccs'
+CLASSES = ['Quiet and Calm', 'Lively and Energetic', 'Cozy and Intimate', 'Busy and Bustling']
+FRAME_INPUT_SHAPE = (10, 224, 224, 3)  # 10 frames, each frame of shape 224x224x3
+SPECTROGRAM_INPUT_SHAPE = (224, 224, 3)
+MFCC_INPUT_SHAPE = (224, 224, 3)
+BATCH_SIZE = 16
+EPOCHS = 20
+TEST_SIZE = 0.3

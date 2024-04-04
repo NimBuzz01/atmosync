@@ -1,103 +1,88 @@
-import librosa
+# Standard library imports
+import os
+import glob
+
+# Third-party library imports
 import numpy as np
-from util import AudioClassifier
-import soundfile as sf
-from ultralytics import YOLO
-import torch
-from constants import audio_classes, video_classes
-import cv2
-import statistics
-from moviepy.editor import VideoFileClip
+from PIL import Image
+from keras.preprocessing import image
+import shutil
 
-# ml_functions.py
-def get_ambiance(num_people, audio_class):
-    if audio_class in ['babble', 'tableforone'] and num_people <= 2:
-        return 'Quiet and Calm'
-    elif audio_class in ['cafeteria', 'chatter', 'cocktailparty', 'downstairs', 'soundproofed', 'waiting'] and num_people > 5:
-        return 'Lively and Energetic'
-    elif audio_class in ['patronsonly', 'tableinfront'] and num_people <= 5:
-        return 'Cozy and Intimate'
-    elif audio_class in ['cafeteria', 'chatter', 'cocktailparty', 'downstairs', 'soundproofed', 'waiting'] and num_people > 10:
-        return 'Busy and Bustling'
-    else:
-        return 'Unclassified'
+# Import EfficientNet preprocess_input function
+from keras.applications.efficientnet import preprocess_input as preprocess_input_efficientnet
+# Import ResNetV2 preprocess_input function
+from keras.applications.resnet_v2 import preprocess_input as preprocess_input_resnet_v2
 
-def get_human_count(video_path):
-    # Your human count ML logic here
-    # Load the YOLO model
-    video_model = YOLO("yolov8n.pt")
-    cap = cv2.VideoCapture(video_path)
+from util import extract_frames, extract_spectrogram_and_mfcc
 
-    # Load the video
-    video = VideoFileClip(video_path)
-    # Frame rate of the video
-    frame_rate = video.fps
-    # Number of frames in 5 seconds
-    frames_in_5_sec = int(5 * frame_rate)
 
-    count = []
+def preprocess_video_for_prediction(video_path, frame_path, spectrogram_path, mfcc_path):
+    # Remove previous directories if they exist
+    for path in [frame_path, spectrogram_path, mfcc_path]:
+        if os.path.exists(path):
+            shutil.rmtree(path)
+            
+    # Ensure directories for saving extracted data exist
+    os.makedirs(frame_path, exist_ok=True)
+    os.makedirs(spectrogram_path, exist_ok=True)
+    os.makedirs(mfcc_path, exist_ok=True)
 
-    for _ in range(int(frames_in_5_sec)):
-        ret, frame = cap.read()
-        if not ret:
-            break
+    video_filename = os.path.basename(video_path)
+    video_base = os.path.splitext(video_filename)[0]
 
-        if ret:
-            og_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            frame = og_frame.copy()
+    frame_loc = os.path.join(frame_path, video_base)
+    spectrogram_loc = os.path.join(spectrogram_path, video_base)
+    mfcc_loc = os.path.join(mfcc_path, video_base)
 
-            # results = video_model(frame, device=0, classes=0, conf=0.8)
-            results = video_model(frame, device='cpu', classes=0, conf=0.5)
+    print('preprocessing video...')
 
-            for result in results:
-                boxes = result.boxes  # Boxes object for bbox outputs
-                # probs = result.probs  # Class probabilities for classification outputs
-                cls = boxes.cls.tolist()  # Convert tensor to list
-                count.append(len(cls))
-                # for class_index in cls:
-                #     class_name = video_classes[int(class_index)]
+    extract_frames(video_path, frame_loc)
+    extract_spectrogram_and_mfcc(video_path, spectrogram_loc, mfcc_loc)
 
-    print(count)
-    try:
-        return statistics.mean(count)
-    except statistics.StatisticsError:
-        return None
+    # Load preprocessed data
+    X_frames, X_spectrograms, X_mfccs = load_preprocessed_data(frame_path, spectrogram_path, mfcc_path)
 
-def get_sound_level(video_path):
-    video = VideoFileClip(video_path)
-    audio_file = video.audio
-    audio_file.write_audiofile('output/temp_audio.wav')
-    # Your sound level ML logic here
-    # Load the trained audio model
-    audio_model = AudioClassifier()
-    audio_model.load_state_dict(torch.load('audio_model.pth'))
-    sound_level = process_audio('output/temp_audio.wav', audio_model)
-    return sound_level
+    return X_frames, X_spectrograms, X_mfccs
 
-def process_audio(audio_path, model):
-    # Read the audio file
-    audio, sr = sf.read(audio_path)
-    # If the audio has two channels (stereo), convert it to mono
-    if len(audio.shape) > 1 and audio.shape[1] == 2:
-        audio = np.mean(audio, axis=1)
-    # Resample the audio to 8000 Hz
-    audio = librosa.resample(y=audio, orig_sr=sr, target_sr=8000)
-    # Define the maximum length of the audio: 5 seconds * 8000 Hz
-    max_length = 5 * 8000
-    # If the audio is shorter than the maximum length, pad it with zeros
-    if len(audio) < max_length:
-        audio = np.pad(audio, (0, max_length - len(audio)))
-    # If the audio is longer than the maximum length, truncate it
-    elif len(audio) > max_length:
-        audio = audio[:max_length]
-    # Reshape the audio to the shape expected by the model
-    audio = audio.reshape(1, 1, -1)
-    # Convert the audio to a PyTorch tensor
-    audio_tensor = torch.Tensor(audio).unsqueeze(0)
-    # Use the model to predict the audio level
-    outputs = model(audio_tensor)
-    # Get the class with the highest predicted probability
-    _, predicted = torch.max(outputs.data, 1)
-    # Convert the predicted class index to a class name
-    audio_level = audio_classes[predicted.item()]
-    return audio_level
+def load_preprocessed_data(frame_path, spectrogram_path, mfcc_path):
+    X_frames, X_spectrograms, X_mfccs = [], [], []
+    # Load frames
+    frame_files = glob.glob(os.path.join(frame_path, '*.png'))
+    frames = []
+    for frame_file in frame_files:        
+        frame_path = os.path.join(frame_file)  # Construct full frame file path
+        frame = Image.open(frame_path)  # Open the frame image
+        frame = frame.resize((224, 224))
+        frame = np.array(frame)
+        frames.append(frame)
+    # Convert frames list to a numpy array and append it to X_frames
+    X_frames.append(np.array(frames))
+    # Convert X_frames to a numpy array
+    X_frames = np.array(X_frames)
+
+    # Load spectrograms
+    spectrogram_files = glob.glob(os.path.join(spectrogram_path, '*.png'))
+    X_spectrograms = []
+    for spectrogram_file in spectrogram_files:
+        spectrogram = image.load_img(spectrogram_file, target_size=(224, 224))
+        spectrogram = image.img_to_array(spectrogram)
+        spectrogram = preprocess_input_resnet_v2(spectrogram)
+        X_spectrograms.append(spectrogram)
+    X_spectrograms = np.array(X_spectrograms)
+
+    # Load MFCCs
+    mfcc_files = glob.glob(os.path.join(mfcc_path, '*.png'))
+    X_mfccs = []
+    for mfcc_file in mfcc_files:
+        mfcc = image.load_img(mfcc_file, target_size=(224, 224))
+        mfcc = image.img_to_array(mfcc)
+        mfcc = preprocess_input_efficientnet(mfcc)
+        X_mfccs.append(mfcc)
+    X_mfccs = np.array(X_mfccs)
+
+    return X_frames, X_spectrograms, X_mfccs
+
+def predict_ambiance(model, X_frames, X_spectrograms, X_mfccs):
+    # Make predictions using the model
+    predictions = model.predict([X_frames, X_spectrograms, X_mfccs])
+    return predictions
