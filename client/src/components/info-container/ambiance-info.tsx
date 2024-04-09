@@ -19,6 +19,7 @@ const AmbianceInfo = () => {
   const [sessionActive, setSessionActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [recording, setRecording] = useState<any>();
+  const [fetching, setFetching] = useState(false);
 
   // Contexts
   const { ambiance, setAmbiance, recommendedGenre } = useAmbianceContext();
@@ -29,7 +30,6 @@ const AmbianceInfo = () => {
   const {
     activeRecordings,
     createRecording,
-    devicesById,
     openCamera,
     startRecording,
     stopRecording,
@@ -51,8 +51,10 @@ const AmbianceInfo = () => {
     // Fetch data when selectedFile changes
     const fetchData = async () => {
       if (selectedFile) {
+        setFetching(true);
         const data: ApiResponse = await getAmbianceData("file", selectedFile);
         setAmbiance(data.ambiance);
+        setFetching(false);
       }
     };
 
@@ -71,8 +73,10 @@ const AmbianceInfo = () => {
     if (recorded) {
       const temp_blob = recorded.blobChunks[0] as Blob;
       ysFixWebmDuration(temp_blob, 5000, async function (blob) {
+        setFetching(true);
         const data: ApiResponse = await getAmbianceData("blob", blob);
         setAmbiance(data.ambiance);
+        setFetching(false);
       });
     }
   };
@@ -82,7 +86,7 @@ const AmbianceInfo = () => {
     let timeoutId: NodeJS.Timeout;
     if (sessionActive && currentPlaying) {
       const songDurationInSeconds = currentPlaying.duration_ms / 1000;
-      const delayBeforeRecording = (songDurationInSeconds - 30) * 1000; // Convert to milliseconds
+      const delayBeforeRecording = (songDurationInSeconds - 15) * 1000; // Convert to milliseconds
       timeoutId = setTimeout(() => {
         startRecord();
       }, delayBeforeRecording);
@@ -144,9 +148,12 @@ const AmbianceInfo = () => {
 
       {ambiance ? (
         <div className=" grow">
-          <div className="flex flex-col items-center justify-center p-4">
+          <div className="relative flex flex-col items-center justify-center p-4">
             <p>Current Ambiance</p>
             <h1 className="text-2xl">{ambiance}</h1>
+            {fetching && (
+              <p className="absolute right-0">Fetching New Ambiance...</p>
+            )}
           </div>
           <Separator />
           <div className="flex items-center justify-between p-2">
@@ -154,7 +161,9 @@ const AmbianceInfo = () => {
               <p>
                 Recommended Genre:{" "}
                 {recommendedGenre.map((genre, index) => (
-                  <span key={index}>{genre}, </span>
+                  <span key={index} className="capitalize">
+                    {genre}
+                  </span>
                 ))}
               </p>
             </div>

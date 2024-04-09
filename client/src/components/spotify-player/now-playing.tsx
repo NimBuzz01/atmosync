@@ -8,10 +8,9 @@ import { FaVolumeLow } from "react-icons/fa6";
 import { IoPlay, IoPause } from "react-icons/io5";
 
 const NowPlaying = () => {
-  const { currentPlaying, songs, setCurrentPlaying, spotifyApi } =
-    useMusicPlayerContext();
+  const { currentPlaying, songs, setCurrentPlaying } = useMusicPlayerContext();
   const [isPlaying, setIsPlaying] = useState(false);
-  const [volume, setVolume] = useState(50);
+  const [volume, setVolume] = useState(10);
   const [progress, setProgress] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 

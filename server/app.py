@@ -12,6 +12,10 @@ from util import return_ambiance
 app = Flask(__name__)
 CORS(app)
 
+print('model loading...')
+model = keras.saving.load_model("fusion_model.keras")
+print('model loaded...')
+
 @app.route('/api/upload', methods=['POST'])
 def upload_video():
     video_file = request.files['video']
@@ -23,15 +27,14 @@ def upload_video():
     video_file.save(video_path)
     print('video saved...')
 
-    # Define your model
-    test_model = keras.saving.load_model("fusion_model.keras")
-
     # Preprocess the video for prediction
     X_frames, X_spectrograms, X_mfccs = preprocess_video_for_prediction(video_path, FRAME_PATH, SPECTROGRAM_PATH, MFCC_PATH)
     print('video preprocessed...')
 
+    global model
+
     # Predict ambiance
-    predictions = predict_ambiance(test_model, X_frames, X_spectrograms, X_mfccs)
+    predictions = predict_ambiance(model, X_frames, X_spectrograms, X_mfccs)
 
     # Display the predicted probabilities for each class
     for i, probability in enumerate(predictions[0]):

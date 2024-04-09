@@ -1,5 +1,8 @@
 # Third-party library imports
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')  # Use a non-interactive backend (e.g., 'Agg') if working in a non-GUI environment
+
 import matplotlib.pyplot as plt
 import cv2
 import librosa
@@ -33,9 +36,11 @@ def extract_frames(video_path, frame_path):
     for i, frame in enumerate(frames):
         image = Image.fromarray(frame)
         image.save(f"{frame_path}_{i}.png")
+    
+    print('frames extracted...')
 
 def extract_spectrogram_and_mfcc(audio_file, spectrogram_file, mfcc_file, num_mfcc=13):
-    y, sr = librosa.load(audio_file)
+    y, sr = librosa.load(audio_file, sr=None)
 
     # Create the spectrogram
     fig, ax = plt.subplots()
@@ -44,6 +49,8 @@ def extract_spectrogram_and_mfcc(audio_file, spectrogram_file, mfcc_file, num_mf
     librosa.display.specshow(log_ms, sr=sr, ax=ax)
     fig.savefig(spectrogram_file)
     plt.close(fig)
+
+    print('spectrogram extracted...')
 
     # Extract MFCCs
     mfccs = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=num_mfcc)
@@ -54,6 +61,8 @@ def extract_spectrogram_and_mfcc(audio_file, spectrogram_file, mfcc_file, num_mf
     fig.colorbar(img, ax=ax)
     fig.savefig(mfcc_file)
     plt.close(fig)
+
+    print('mfcc extracted...')
 
 def return_ambiance(ambiance):
     if ambiance == "Quiet and Calm":
