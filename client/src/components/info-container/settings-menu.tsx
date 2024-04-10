@@ -59,50 +59,8 @@ const SettingsMenu = () => {
             <span>Profile</span>
           </DropdownMenuItem>
           <DropdownMenuItem>
-            <CreditCard className="w-4 h-4 mr-2" />
-            <span>Billing</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
             <Settings className="w-4 h-4 mr-2" />
             <span>Settings</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Keyboard className="w-4 h-4 mr-2" />
-            <span>Keyboard shortcuts</span>
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <Users className="w-4 h-4 mr-2" />
-            <span>Team</span>
-          </DropdownMenuItem>
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
-              <UserPlus className="w-4 h-4 mr-2" />
-              <span>Invite users</span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent>
-                <DropdownMenuItem>
-                  <Mail className="w-4 h-4 mr-2" />
-                  <span>Email</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <MessageSquare className="w-4 h-4 mr-2" />
-                  <span>Message</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <PlusCircle className="w-4 h-4 mr-2" />
-                  <span>More...</span>
-                </DropdownMenuItem>
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
-          <DropdownMenuItem>
-            <Plus className="w-4 h-4 mr-2" />
-            <span>New Team</span>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />

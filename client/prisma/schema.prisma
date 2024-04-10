@@ -40,10 +40,11 @@ model Session {
 }
 
 model History {
-  id        String   @id @default(cuid())
-  userId    String   @map("user_id")
-  createdAt DateTime @default(now())
-  ambiance  String
+  id          String   @id @default(cuid())
+  userId      String   @map("user_id")
+  createdAt   DateTime @default(now())
+  ambiance    String
+  genrePlayed String
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

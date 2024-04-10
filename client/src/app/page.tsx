@@ -2,10 +2,21 @@
 import Preloader from "@/components/preloader";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function Home() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.push("/dashboard");
+    }
+
+    if (status === "unauthenticated") {
+      router.push("/login");
+    }
+  }, [status, router]);
 
   if (status === "loading") {
     return (
@@ -15,11 +26,5 @@ export default function Home() {
     );
   }
 
-  if (status === "authenticated") {
-    router.push("/dashboard");
-  }
-
-  if (status === "unauthenticated") {
-    router.push("/login");
-  }
+  return null;
 }

@@ -148,25 +148,21 @@ const AmbianceInfo = () => {
 
       {ambiance ? (
         <div className=" grow">
-          <div className="relative flex flex-col items-center justify-center p-4">
-            <p>Current Ambiance</p>
-            <h1 className="text-2xl">{ambiance}</h1>
-            {fetching && (
-              <p className="absolute right-0">Fetching New Ambiance...</p>
-            )}
+          <div className="flex items-center justify-around p-4">
+            <div className="text-center">
+              <p>Current Ambiance</p>
+              <h1 className="text-2xl">{ambiance}</h1>
+            </div>
+            <div className="text-center">
+              <p>Playing Recommended Genre</p>
+              <h1 className="text-2xl capitalize">{recommendedGenre}</h1>
+            </div>
           </div>
           <Separator />
           <div className="flex items-center justify-between p-2">
-            <div>
-              <p>
-                Recommended Genre:{" "}
-                {recommendedGenre.map((genre, index) => (
-                  <span key={index} className="capitalize">
-                    {genre}
-                  </span>
-                ))}
-              </p>
-            </div>
+            <p className={`text-lg ${fetching ? "opacity-100" : "opacity-0"}`}>
+              Fetching New Ambiance...
+            </p>
             <UserHistory />
           </div>
         </div>

@@ -14,8 +14,8 @@ import {
 interface AmbianceContextType {
   ambiance: string;
   setAmbiance: (value: string) => void;
-  recommendedGenre: string[];
-  setRecommendedGenre: (value: string[]) => void;
+  recommendedGenre: string;
+  setRecommendedGenre: (value: string) => void;
 }
 
 // Define the context
@@ -28,14 +28,18 @@ export const AmbianceProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [ambiance, setAmbiance] = useState<string>("");
-  const [recommendedGenre, setRecommendedGenre] = useState<string[]>([]);
+  const [recommendedGenre, setRecommendedGenre] = useState<string>("");
 
   const { data: session } = useSession();
 
   useEffect(() => {
     const createEntry = async () => {
       if (session?.user.id) {
-        await createHistoryEntry(session?.user?.id, ambiance);
+        await createHistoryEntry(
+          session?.user?.id,
+          ambiance,
+          getRecommendedGenre(ambiance)
+        );
       }
     };
     if (ambiance) {
